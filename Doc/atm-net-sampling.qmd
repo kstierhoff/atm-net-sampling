@@ -1,0 +1,72 @@
+---
+title: "ATM Net Sampling Analysis"
+author: "Stierhoff, Dolan, Demer"
+
+format:
+  html:
+    toc: true
+    html-math-method: katex
+    embed-resources: false
+
+execute: 
+  echo: false
+  warning: false
+  error: false
+---
+
+```{r yaml-options}
+#| eval: false
+
+format:
+  pdf:
+   toc: true
+   number-sections: true
+   colorlinks: true
+
+format:
+  html:
+    toc: true
+    html-math-method: katex
+    embed-resources: false
+```
+
+# Abstract
+
+\[Abstract submitted to the ICES Symposium - Spring 2022\]
+
+Since 2006, acoustic-trawl-method surveys have been used to estimate the distributions, biomasses, and demographics of coastal pelagic fish species (CPS; e.g., anchovy, sardine, mackerels, and herring) in the California Current Ecosystem. During daytime, when CPS typically school at depths observable with ship-based echosounders, acoustic backscatter is measured along transects perpendicular to the coast. At night, when CPS typically ascend and disperse to feed, catches are obtained from a trawl net towed near the sea-surface in areas where putative CPS backscatter was observed earlier that day. The catches provide species composition and length data used to apportion the CPS backscatter to the species present, and to estimate their biomasses. To test the hypothesis that species composition and lengths from nighttime catches are representative of the CPS backscatter observed earlier the same day, we compare catches from nighttime trawls and daytime purse-seines sets on CPS schools in approximately the same place and time. We examine the effects of differences in catch information on the CPS biomass estimates; and perform a sensitivity analysis on the catch effort needed to obtain precise biomass estimates. We discuss the inter-annual consistency in regional catch compositions, and the coherence in biomass-at-length time-series resulting from the present approach.
+
+```{r setup}
+# Install and load pacman (library management package)
+if (!require("pacman")) install.packages("pacman")
+
+# Install and load required packages from CRAN ---------------------------------
+pacman::p_load(tidyverse, gt, lubridate, here, odbc, patchwork,
+               mapview, fs)
+
+# Install and load required packages from Github -------------------------------
+# surveyR
+pacman::p_load_gh("kstierhoff/atm")
+```
+
+# Introduction
+
+Blah, blah...
+
+# Methods
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+# Results
+
+# Discussion
