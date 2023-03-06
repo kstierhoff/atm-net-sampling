@@ -56,7 +56,7 @@ trawl.color <- "black"
   
 # Trawl proportion plots
 scale.pies <- FALSE   # Scale pie charts (TRUE/FALSE)
-pie.scale  <- 0.0125 # 0.01-0.02 works well for coast-wide survey (i.e., summer), larger values (~0.03) for spring
+pie.scale  <- 0.02 # 0.01-0.02 works well for coast-wide survey (i.e., summer), larger values (~0.03) for spring
 
 # Trawl
 # For legend objects

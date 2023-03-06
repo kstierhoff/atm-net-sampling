@@ -37,16 +37,50 @@ if (import.data) {
   
   load("C:/KLS/CODE/Github/estimATM/2207RL/Output/lengths_final.Rdata")
   saveRDS(lengths, here::here("Data/trawl/lengths_2207RL.rds"))
-} 
+} else {
+  # Load specimen data
+  lengths.2019 <- readRDS(here::here("Data/trawl/lengths_1907RL.rds")) %>% 
+    mutate(survey = "1907RL")
+  lengths.2021 <- readRDS(here::here("Data/trawl/lengths_2107RL.rds")) %>% 
+    mutate(survey = "2107RL")
+  lengths.2022 <- readRDS(here::here("Data/trawl/lengths_2207RL.rds")) %>% 
+    mutate(survey = "2207RL")  
+  
+  # Combine specimen data
+  lengths.trawl <- lengths.2019 %>% bind_rows(lengths.2021) %>% bind_rows(lengths.2022)
+  saveRDS(lengths.trawl, here::here("Data/trawl/lengths_trawl.rds"))
+}
 
-# Load specimen data
-lengths.2019 <- readRDS(here::here("Data/trawl/lengths_1907RL.rds")) %>% 
-  mutate(survey = "1907RL")
-lengths.2021 <- readRDS(here::here("Data/trawl/lengths_2107RL.rds")) %>% 
-  mutate(survey = "2107RL")
-lengths.2022 <- readRDS(here::here("Data/trawl/lengths_2207RL.rds")) %>% 
-  mutate(survey = "2207RL")
+## Import clf data
+if (import.data) {
+  load("C:/KLS/CODE/Github/estimATM/1907RL/Output/clf_ts_proportions.Rdata")
+  saveRDS(clf, here::here("Data/trawl/clf_1907RL.rds"))
+  
+  load("C:/KLS/CODE/Github/estimATM/2107RL/Output/clf_ts_proportions.Rdata")
+  saveRDS(clf, here::here("Data/trawl/clf_2107RL.rds"))
+  
+  load("C:/KLS/CODE/Github/estimATM/2207RL/Output/clf_ts_proportions.Rdata")
+  saveRDS(clf, here::here("Data/trawl/clf_2207RL.rds"))
+} else {
+  # Load clf data
+  clf.2019 <- readRDS(here::here("Data/trawl/clf_1907RL.rds")) %>% 
+    mutate(survey = "1907RL")
+  clf.2021 <- readRDS(here::here("Data/trawl/clf_2107RL.rds")) %>% 
+    mutate(survey = "2107RL")
+  clf.2022 <- readRDS(here::here("Data/trawl/clf_2207RL.rds")) %>% 
+    mutate(survey = "2207RL")
+  
+  # Combine specimen data
+  clf.all <- clf.2019 %>% bind_rows(clf.2021) %>% bind_rows(clf.2022)
+  
+  # Replace missing sample type with "Trawl"
+  clf.all <- replace_na(clf.all, list(sample.type = "Trawl"))
 
-# Combine specimen data
-lengths.trawl <- lengths.2019 %>% bind_rows(lengths.2021) %>% bind_rows(lengths.2022)
-saveRDS(lengths.trawl, here::here("Data/trawl/lengths_trawl.rds"))
+  saveRDS(clf.all, here::here("Data/trawl/clf_all.rds"))
+}
+
+clf.zero <- filter(clf.all, CPS.num == 0)
+clf.pos <- filter(clf.all, CPS.num > 0) %>% 
+  arrange(X)
+
+
