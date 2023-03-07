@@ -1,5 +1,5 @@
-# pacman::p_load(tidyverse, lubridate, here)
-# import.data <- TRUE
+pacman::p_load(tidyverse, lubridate, here)
+import.data <- TRUE
 
 # Catch data
 ## Import catch data
@@ -20,11 +20,40 @@ catch.2019 <- readRDS(here::here("Data/trawl/catch_1907RL.rds")) %>%
 catch.2021 <- readRDS(here::here("Data/trawl/catch_2107RL.rds")) %>% 
   mutate(survey = "2107RL")
 catch.2022 <- readRDS(here::here("Data/trawl/catch_2207RL.rds")) %>% 
-  mutate(survey = "2207RL")
+  mutate(survey = "2207RL")  
 
 # Combine catch data
 catch.trawl <- catch.2019 %>% bind_rows(catch.2021) %>% bind_rows(catch.2022)
 saveRDS(catch.trawl, here::here("Data/trawl/catch_trawl.rds"))
+
+# Format for plotting
+haul.summ.wt <- catch.trawl %>%
+  select(survey, haul, cluster, scientificName, totalWeight) %>%
+  tidyr::spread(scientificName, totalWeight) %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(AllCPS = rowSums(select(., -survey, -haul, -cluster))) %>%
+  rename("PacHerring" = "Clupea pallasii",
+         "Anchovy"    = "Engraulis mordax",
+         "Sardine"    = "Sardinops sagax",
+         "PacMack"    = "Scomber japonicus",
+         "JackMack"   = "Trachurus symmetricus",
+         "RndHerring" = "Etrumeus acuminatus")
+
+# Summarise catch by cluster
+cluster.pie <- haul.summ.wt %>% 
+  select(-haul, -AllCPS) %>% 
+  group_by(survey, cluster) %>% 
+  summarise_all(list(sum)) %>% 
+  ungroup() %>% 
+  mutate(AllCPS = rowSums(select(., -survey, -cluster)),
+         r = pie.radius) %>% 
+  replace(is.na(.), 0) %>% 
+  # Add lat/long
+  left_join(select(clf.all, survey, cluster, lat, long, X, Y))
+
+cluster.zero <- filter(cluster.pie, AllCPS == 0) 
+cluster.pos <- filter(cluster.pie, AllCPS > 0) %>% 
+  arrange(X)
 
 # Specimen data
 ## Import specimen data
@@ -37,19 +66,19 @@ if (import.data) {
   
   load("C:/KLS/CODE/Github/estimATM/2207RL/Output/lengths_final.Rdata")
   saveRDS(lengths, here::here("Data/trawl/lengths_2207RL.rds"))
-} else {
-  # Load specimen data
-  lengths.2019 <- readRDS(here::here("Data/trawl/lengths_1907RL.rds")) %>% 
-    mutate(survey = "1907RL")
-  lengths.2021 <- readRDS(here::here("Data/trawl/lengths_2107RL.rds")) %>% 
-    mutate(survey = "2107RL")
-  lengths.2022 <- readRDS(here::here("Data/trawl/lengths_2207RL.rds")) %>% 
-    mutate(survey = "2207RL")  
-  
-  # Combine specimen data
-  lengths.trawl <- lengths.2019 %>% bind_rows(lengths.2021) %>% bind_rows(lengths.2022)
-  saveRDS(lengths.trawl, here::here("Data/trawl/lengths_trawl.rds"))
-}
+} 
+
+# Load specimen data
+lengths.2019 <- readRDS(here::here("Data/trawl/lengths_1907RL.rds")) %>% 
+  mutate(survey = "1907RL")
+lengths.2021 <- readRDS(here::here("Data/trawl/lengths_2107RL.rds")) %>% 
+  mutate(survey = "2107RL")
+lengths.2022 <- readRDS(here::here("Data/trawl/lengths_2207RL.rds")) %>% 
+  mutate(survey = "2207RL")  
+
+# Combine specimen data
+lengths.trawl <- lengths.2019 %>% bind_rows(lengths.2021) %>% bind_rows(lengths.2022)
+saveRDS(lengths.trawl, here::here("Data/trawl/lengths_trawl.rds"))
 
 ## Import clf data
 if (import.data) {
@@ -73,8 +102,14 @@ if (import.data) {
   # Combine specimen data
   clf.all <- clf.2019 %>% bind_rows(clf.2021) %>% bind_rows(clf.2022)
   
-  # Replace missing sample type with "Trawl"
-  clf.all <- replace_na(clf.all, list(sample.type = "Trawl"))
+  # Replace missing values
+  clf.all <- clf.all %>% 
+    # sample type with "Trawl"
+    replace_na(list(sample.type = "Trawl")) %>%
+    # round herring proportions with zeros (only present in 2021)
+    replace_na(list(prop.rher = 0, prop.rher.wg = 0)) %>%
+    # Remove purse seine sets
+    filter(sample.type == "Trawl")
 
   saveRDS(clf.all, here::here("Data/trawl/clf_all.rds"))
 }
