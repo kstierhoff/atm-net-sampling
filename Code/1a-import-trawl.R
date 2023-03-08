@@ -26,35 +26,6 @@ catch.2022 <- readRDS(here::here("Data/trawl/catch_2207RL.rds")) %>%
 catch.trawl <- catch.2019 %>% bind_rows(catch.2021) %>% bind_rows(catch.2022)
 saveRDS(catch.trawl, here::here("Data/trawl/catch_trawl.rds"))
 
-# Format for plotting
-haul.summ.wt <- catch.trawl %>%
-  select(survey, haul, cluster, scientificName, totalWeight) %>%
-  tidyr::spread(scientificName, totalWeight) %>% 
-  replace(is.na(.), 0) %>% 
-  mutate(AllCPS = rowSums(select(., -survey, -haul, -cluster))) %>%
-  rename("PacHerring" = "Clupea pallasii",
-         "Anchovy"    = "Engraulis mordax",
-         "Sardine"    = "Sardinops sagax",
-         "PacMack"    = "Scomber japonicus",
-         "JackMack"   = "Trachurus symmetricus",
-         "RndHerring" = "Etrumeus acuminatus")
-
-# Summarise catch by cluster
-cluster.pie <- haul.summ.wt %>% 
-  select(-haul, -AllCPS) %>% 
-  group_by(survey, cluster) %>% 
-  summarise_all(list(sum)) %>% 
-  ungroup() %>% 
-  mutate(AllCPS = rowSums(select(., -survey, -cluster)),
-         r = pie.radius) %>% 
-  replace(is.na(.), 0) %>% 
-  # Add lat/long
-  left_join(select(clf.all, survey, cluster, lat, long, X, Y))
-
-cluster.zero <- filter(cluster.pie, AllCPS == 0) 
-cluster.pos <- filter(cluster.pie, AllCPS > 0) %>% 
-  arrange(X)
-
 # Specimen data
 ## Import specimen data
 if (import.data) {
