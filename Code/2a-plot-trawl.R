@@ -2,7 +2,7 @@
 # source(here::here("Doc/settings.R"))
 
 # Load map data
-load(here("Data/map/basemap.Rdata"))
+if (!exists("base.map")) load(here("Data/map/basemap.Rdata"))
 
 # Calculate pie radius based on latitude range
 # Use clf data to resize map, if needed
