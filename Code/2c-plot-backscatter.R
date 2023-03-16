@@ -1,7 +1,3 @@
-# pacman::p_load(tidyverse, lubridate, here, scatterpie, patchwork, sf)
-# pacman::p_load_gh("kstierhoff/atm")
-# source(here::here("Doc/settings.R"))
-
 # Load map data
 if (!exists("base.map")) load(here("Data/map/basemap.Rdata"))
 

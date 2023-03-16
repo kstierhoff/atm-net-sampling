@@ -1,8 +1,3 @@
-# pacman::p_load(tidyverse, lubridate, here)
-# pacman::p_load_gh("kstierhoff/atmData")
-
-# import.data <- TRUE
-
 # Backscatter data
 ## Core area
 if (import.data) {
