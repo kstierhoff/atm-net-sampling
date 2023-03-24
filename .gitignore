@@ -4,3 +4,5 @@ Doc/atm-net-sampling_files/*
 Doc/*.pdf
 Doc/*.html
 Figs/*
+Output/*
+Reference/*
