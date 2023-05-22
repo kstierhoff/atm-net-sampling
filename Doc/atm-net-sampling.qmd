@@ -3,15 +3,16 @@ title: "ATM Net Sampling Analysis"
 author: "Stierhoff, Dolan, Demer"
 
 format:
-  html:
-    toc: true
-    html-math-method: katex
-    embed-resources: false
+  pdf:
+   toc: true
+   number-sections: true
+   colorlinks: true
 
 execute: 
   echo: false
   warning: false
   error: false
+bibliography: references.bib
 ---
 
 ```{r yaml-options}
@@ -30,30 +31,66 @@ format:
     embed-resources: false
 ```
 
-# Abstract
-
-\[Abstract submitted to the ICES Symposium - Spring 2022\]
-
-Since 2006, acoustic-trawl-method surveys have been used to estimate the distributions, biomasses, and demographics of coastal pelagic fish species (CPS; e.g., anchovy, sardine, mackerels, and herring) in the California Current Ecosystem. During daytime, when CPS typically school at depths observable with ship-based echosounders, acoustic backscatter is measured along transects perpendicular to the coast. At night, when CPS typically ascend and disperse to feed, catches are obtained from a trawl net towed near the sea-surface in areas where putative CPS backscatter was observed earlier that day. The catches provide species composition and length data used to apportion the CPS backscatter to the species present, and to estimate their biomasses. To test the hypothesis that species composition and lengths from nighttime catches are representative of the CPS backscatter observed earlier the same day, we compare catches from nighttime trawls and daytime purse-seines sets on CPS schools in approximately the same place and time. We examine the effects of differences in catch information on the CPS biomass estimates; and perform a sensitivity analysis on the catch effort needed to obtain precise biomass estimates. We discuss the inter-annual consistency in regional catch compositions, and the coherence in biomass-at-length time-series resulting from the present approach.
-
 ```{r setup}
 # Install and load pacman (library management package)
 if (!require("pacman")) install.packages("pacman")
 
 # Install and load required packages from CRAN ---------------------------------
 pacman::p_load(tidyverse, gt, lubridate, here, odbc, patchwork,
-               mapview, fs)
+               mapview, fs, sf)
 
 # Install and load required packages from Github -------------------------------
 # surveyR
 pacman::p_load_gh("kstierhoff/atm")
 ```
 
+```{r user-controls}
+# Import data; else use existing data
+import.data <- FALSE
+save.figs   <- FALSE
+```
+
+```{r user-options}
+# Mapping options
+crs.proj <- 3310
+crs.geog <- 4326
+map.height <- 10
+```
+
+```{r source-data}
+# Source data
+source(here("Code/1-load-data.R"))
+```
+
+\newpage
+
+# Abstract
+
+Since 2006, acoustic-trawl-method surveys have been used to estimate the distributions, biomasses, and demographics of coastal pelagic fish species (CPS; e.g., Northern Anchovy, Pacific Sardine, Pacific and Jack Mackerels, and Pacific Herring) in the California Current Ecosystem. During daytime, when CPS typically school at depths observable with ship-based echosounders, acoustic backscatter is measured along transects perpendicular to the coast. At night, when CPS typically ascend and disperse to feed, catches are obtained from a trawl net towed near the sea-surface in areas where putative CPS backscatter was observed earlier that day. The catches provide species composition and length data used to apportion the CPS backscatter to the species present, and to estimate their biomasses. To test the hypothesis that species composition and lengths from nighttime catches are representative of the CPS backscatter observed earlier the same day, we compare catches from nighttime trawls and daytime purse-seines sets on CPS schools in approximately the same place and time. We examine the effects of differences in catch information on the CPS biomass estimates; and perform a sensitivity analysis on the catch effort needed to obtain precise biomass estimates. ***We discuss the inter-annual consistency in regional catch compositions, and the coherence in biomass-at-length time-series resulting from the present approach.***
+
 # Introduction
 
-Blah, blah...
+NOAA Fisheries' Southwest Fisheries Science Center (SWFSC) and their partners routinely use acoustic trawl method (ATM) surveys along the U.S. West Coast to produce estimates of biomass used in stock assessments of Pacific Sardine (*Sardinops sagax*), Pacific Mackerel (*Scomber japonicus*), and Northern Anchovy (*Engraulis mordax*), but also produces estimates of other CPS (e.g., Pacific Herring, *Clupea pallasii* and Jack Mackerel, *Trachurus symmetricus*) present in the California Current Ecosystem (CCE, @Zwolinski2014 ). In brief, ATM surveys use acoustic backscatter measured by calibrated echosounders to estimate biomass from fish echoes, and net sampling to provide size and species composition information used to apportion backscatter, and thus biomass, to the various fish scatters present in the area surveyed.
+
+The accuracy and precision of biomass estimates from ATM surveys is influenced by how well the net-sampling represents the distribution and community structure of the fish scatterers detected by the echosounders. Optimally, spatially intensive net sampling would occur as near as possible in space and time to characterize the community structure of fish targets that contribute to the measured backscatter. However, trade-offs may exist between net sampling intensity and survey area covered, and between various net-sampling methods used for biological sampling.
+
+For example, and for a finite amount of available effort, intensive net-sampling may provide a more accurate description of species composition at the expense of transect density (i.e., spacing between transects), total area covered, or both. These effects may be mitigated by increasing net- and acoustic-sampling effort in areas with historically high species diversity and reducing it elsewhere. Furthermore, daytime purse-seine sampling may minimize temporal and spatial lags between echo detection and biological sampling, but suffer from net avoidance by fast-swimming fishes or incomplete sampling of patchily distributed monospecific fish schools. Alternatively, nighttime trawl sampling may better characterize fish scatterers over a broader region by sampling dispersed schools near the surface and minimize net avoidance but have a greater time between acoustic detection and net sampling.
+
+Using data collected from NOAA Ship *Reuben Lasker* and F/V *Lisa Marie* during summer 2019, this study 1) simulated reductions in net sampling effort to examine the effects on biomass estimates and their variance, and 2) compared biomass estimates produced from acoustic backscatter apportioned using catches from surface trawls towed at night and purse-seine nets set during the day.
 
 # Methods
+
+## Survey area and platforms
+
+In summer 2019, an ATM survey was conducted aboard NOAA Ship *Reuben Lasker* over the continental shelf (\~25-2,000 m seabed depth) in the CCE between Cape Flattery, WA and San Diego, CA (**Fig. X**). During the day, acoustic backscatter was measured along transects oriented perpendicular to the coast, then catches from up to three surface trawls towed at night were used to describe the lengths and species composition of fishes where backscatter was observed the previous day. Along the WA and OR coast, F/V *Lisa Marie* conducted acoustic and purse-seine sampling along 5 nmi-long transects in shallow areas (\<25 m) where sampling by *Reuben Lasker* was inefficient, unsafe, or both.
+
+## Sensitivity of biomass estimates to net-sampling effort
+
+In 2019, catches from trawls conducted on the same night were combined into 61 trawl clusters. Then species proportions and lengths from the trawl cluster nearest in space was assigned to each 100-m long acoustic transect interval to apportion acoustic backscatter to each species present. Next, acoustic transects were post-stratified and used to estimate the biomasses and their coefficients of variance (CVs; from 500 random bootstrapped samples) of the five dominant CPS following the methods described in Stierhoff et al. (2020). Finally, biomasses and their CVs were estimated using the same method but with a random selection of 90%, 75%, and 50% of all clusters to simulate a 10%, 25% or 50% reduction in effort, respectively and compared to estimates from the full survey (Fig. 1).
+
+## Biomass estimated from nighttime trawls vs. daytime purse-seines
+
+Biomasses of the five dominant CPS were estimated for a portion of the coast-wide survey, between Cape Flattery and the OR-CA border, using backscatter measured along transects sampled by Lasker and either 1) nighttime trawl catches from Lasker, or 2) daytime purse-seine catches from Lisa Marie (Fig. 2).
 
 ```{r}
 
@@ -69,4 +106,74 @@ Blah, blah...
 
 # Results
 
+## Effect of net-sampling effort on biomass estimates
+
+Reducing sampling effort altered the shape, area, and number of strata in which biomass was estimated (Fig. 3). For most species and strata, mean biomass did not differ significantly from the estimate when including all trawl clusters, but the precision of biomass estimates increased as effort was reduced (Fig. 4).
+
 # Discussion
+
+## Net-sampling effort and survey precision
+
+Biomass estimates were relatively robust to reductions in trawl sampling effort, but the precision of those estimates decreased greatly as sampling effort decreased and was probably caused by variation in stratum areas. Biomass estimates would be most affected by reductions in net-sampling effort in areas where species diversity is greatest, especially if species are patchily distributed, occur on monospecific schools, or both.
+
+## Net-sampling methods and biomass estimation
+
+Differences in biomasses estimated using catches from trawls and purse-seines varied by species. Catches of Pacific Herring and Pacific Sardines were most similar between gear types, and had the least difference between biomass estimates. Two fast-swimming species, Jack and Pacific Mackerels, appeared to be underrepresented in purse-seine catches and had the greatest differences in estimated biomass.
+
+## Future directions
+
+This analysis was performed opportunistically without controlling for spatial differences in net sampling methods. Future studies will aim to conduct purse-seine sampling during day and night, and throughout the survey area to allow for better comparison of results from different gear types.
+
+# References
+
+
+
+# Tables
+
+# Figures
+
+```{r survey-map}
+#| eval: false
+map.bounds <- nasc.core %>%
+  st_as_sf(coords = c("long", "lat"), crs = crs.geog) %>%
+  st_transform(crs = crs.proj) %>%
+  st_bbox()
+
+map.aspect <- (map.bounds$xmax - map.bounds$xmin)/(map.bounds$ymax - map.bounds$ymin)
+
+map.width  <- map.height*map.aspect
+
+load(here("Data/map/basemap.Rdata"))
+
+transects <- read_csv(here("Data/map/waypoints_1907RL.csv")) %>%
+  st_as_sf(coords = c("Longitude","Latitude"), crs = crs.geog) %>%
+  group_by(Type, Transect, Region) %>%
+  summarise(do_union = F) %>%
+  st_cast("LINESTRING") %>% 
+  filter(Type %in% c("Adaptive","Compulsory","Nearshore"))
+
+base.map + 
+  geom_sf(data = transects) +
+  coord_sf(crs = crs.proj, # CA Albers Equal Area Projection
+           xlim = unname(c(map.bounds["xmin"], map.bounds["xmax"])), 
+           ylim = unname(c(map.bounds["ymin"], map.bounds["ymax"])))
+
+map.bounds.ns <- nasc.ns %>%
+  st_as_sf(coords = c("long", "lat"), crs = crs.geog) %>%
+  st_transform(crs = crs.proj) %>%
+  st_bbox()
+  
+library(ggmagnify)
+base.map + 
+  geom_magnify(data = transects,
+               aes(from = Region == "WA/OR"),
+                    to = c(map.bounds.ns$xmin, map.bounds.ns$xmax, 
+                           map.bounds.ns$ymin, map.bounds.ns$ymax), 
+                    shadow = TRUE, linewidth = 1, colour = "blue",
+                    shape = "outline", 
+                    aspect = "fixed", 
+                    expand = 0) 
+  
+  
+```
+
