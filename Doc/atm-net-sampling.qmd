@@ -7,12 +7,15 @@ format:
    toc: true
    number-sections: true
    colorlinks: true
-
+   
+crossref:
+  fig-prefix: "Fig."   # (default is "Figure")
+  
 execute: 
   echo: false
   warning: false
   error: false
-bibliography: references.bib
+bibliography: ast_bib.bib
 ---
 
 ```{r yaml-options}
@@ -31,7 +34,9 @@ format:
     embed-resources: false
 ```
 
-```{r setup}
+```{r}
+#| label: setup
+
 # Install and load pacman (library management package)
 if (!require("pacman")) install.packages("pacman")
 
@@ -44,21 +49,24 @@ pacman::p_load(tidyverse, gt, lubridate, here, odbc, patchwork,
 pacman::p_load_gh("kstierhoff/atm")
 ```
 
-```{r user-controls}
+```{r}
+#| label: user-controls
+
 # Import data; else use existing data
 import.data <- FALSE
 save.figs   <- FALSE
 ```
 
-```{r user-options}
+```{r}
+#| label: user-options
 # Mapping options
 crs.proj <- 3310
 crs.geog <- 4326
 map.height <- 10
 ```
 
-```{r source-data}
-# Source data
+```{r}
+#| label: source-data
 source(here("Code/1-load-data.R"))
 ```
 
@@ -72,19 +80,19 @@ Since 2006, acoustic-trawl-method surveys have been used to estimate the distrib
 
 # Introduction
 
-Acoustic-trawl-method (ATM) surveys are widely used to assess populations of small pelagic fishes [**REFS**]. NOAA Fisheries' Southwest Fisheries Science Center (SWFSC) and their partners routinely use acoustic trawl method (ATM) surveys along the U.S. West Coast to produce estimates of biomass used in stock assessments of Pacific Sardine (*Sardinops sagax*), Pacific Mackerel (*Scomber japonicus*), and Northern Anchovy (*Engraulis mordax*), but also produces estimates of other CPS (e.g., Pacific Herring, *Clupea pallasii* and Jack Mackerel, *Trachurus symmetricus*) present in the California Current Ecosystem (CCE, @Zwolinski2014 ). In brief, ATM surveys use acoustic backscatter measured by calibrated echosounders to estimate biomass from fish echoes, and net sampling to provide size and species composition information used to apportion backscatter, and thus biomass, to the various fish scatters present in the area surveyed [**REFS**].
+Acoustic-trawl-method (ATM) surveys are widely used to assess populations of small pelagic fishes \[**REFS**\]. NOAA Fisheries' Southwest Fisheries Science Center (SWFSC) and their partners routinely use acoustic trawl method (ATM) surveys along the U.S. West Coast to produce estimates of biomass used in stock assessments of Pacific Sardine (*Sardinops sagax*), Pacific Mackerel (*Scomber japonicus*), and Northern Anchovy (*Engraulis mordax*), but also produces estimates of other CPS (e.g., Pacific Herring, *Clupea pallasii* and Jack Mackerel, *Trachurus symmetricus*) present in the California Current Ecosystem (CCE)[@Zwolinski2014; @Stierhoff2020b]. In brief, ATM surveys use acoustic backscatter measured by calibrated echosounders to estimate biomass from fish echoes, and net sampling to provide size and species composition information used to apportion backscatter, and thus biomass, to the various fish scatters present in the area surveyed \[**REFS**\].
 
 The accuracy and precision of biomass estimates from ATM surveys is influenced by how well the net-sampling represents the distribution and community structure of the fish scatterers detected by the echosounders. Optimally, spatially intensive net sampling would occur as near as possible in space and time to characterize the community structure of fish targets that contribute to the measured backscatter. However, trade-offs may exist between the method, timing, and intensity of biological sampling and the scope, accuracy, and precision of the survey.
 
 For example, and for a finite amount of available effort, intensive net-sampling may provide a more accurate description of species composition at the expense of transect density (i.e., spacing between transects), total area covered, or both. These effects may be mitigated by stratified sampling wherein net- and acoustic-sampling effort is increased in areas with historically high species diversity and abundance, and reduced elsewhere. Furthermore, daytime purse-seine sampling may minimize temporal and spatial lags between echo detection and biological sampling, but suffer from net avoidance by fast-swimming fishes or incomplete sampling of patchily distributed monospecific fish schools. Alternatively, nighttime trawl sampling may better characterize fish scatterers over a broader region by sampling dispersed schools near the surface and minimize net avoidance but have a greater time between acoustic detection and net sampling.
 
-Using data collected from NOAA Ship *Reuben Lasker* (hereafter *Lasker*) and F/V *Lisa Marie* during summer 2019, this study 1) simulated reductions in net sampling effort to examine the effects on biomass estimates and their variance, and 2) compared biomass estimates produced from acoustic backscatter apportioned using catches from surface trawls towed at night and purse-seine nets set during the day.
+Using data collected from NOAA Ship *Reuben Lasker* (hereafter *Lasker*) and F/V *Lisa Marie* during summer 2019 (), this study 1) simulated reductions in net sampling effort to examine the effects on biomass estimates and their variance, and 2) compared biomass estimates produced from acoustic backscatter apportioned using catches from surface trawls towed at night and purse-seine nets set during the day.
 
 # Methods
 
 ## Survey area and platforms
 
-In summer 2019, an ATM survey was conducted aboard Lasker over the continental shelf (\~25-2,000 m seabed depth) in the CCE between Cape Flattery, WA and San Diego, CA (). During the day, acoustic backscatter was measured along transects oriented perpendicular to the coast, then catches from up to three surface trawls towed at night were used to describe the lengths and species composition of fishes where backscatter was observed the previous day. Along the WA and OR coast, *Lisa Marie* conducted acoustic and purse-seine sampling along 5 nmi-long transects in shallow areas (\<25 m) where sampling by *Lasker* was inefficient, unsafe, or both.
+In summer 2019, an ATM survey was conducted aboard Lasker over the continental shelf (\~25-2,000 m seabed depth) in the CCE between Cape Flattery, WA and San Diego, CA (@fig-survey-map). During the day, acoustic backscatter was measured along transects oriented perpendicular to the coast, then catches from up to three surface trawls towed at night were used to describe the lengths and species composition of fishes where backscatter was observed the previous day. Along the WA and OR coast, *Lisa Marie* conducted acoustic and purse-seine sampling along 5 nmi-long transects in shallow areas (\<25 m) where sampling by *Lasker* was inefficient, unsafe, or both.
 
 ## Sensitivity of biomass estimates to net-sampling effort
 
@@ -140,14 +148,15 @@ This analysis was performed opportunistically without controlling for spatial di
 # Figures
 
 ```{r}
-#| label: survey-map
+#| label: fig-survey-map
 #| fig-cap: "Map depicting the extent of the area surveyed by NOAA Ship Reuben Lasker and F/V Lisa Marie."
 
 include_graphics(here("Figs/fig_survey_plan.png"))
 
 ```
 
-```{r survey-map-code}
+```{r}
+#| label: fig-survey-map-code
 #| eval: false
 
 map.bounds <- nasc.core %>%
